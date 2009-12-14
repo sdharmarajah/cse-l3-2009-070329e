@@ -19,5 +19,3 @@ So I hope it will be a great tool for the Sinhala Bloggers and Blog readers who 
 And there is an option for those who like to use the Phonetic style (singlish) keyboard.
 
 User will be provided a UI with useful information (ex. Keyboard Layout)
-
-= Details =
