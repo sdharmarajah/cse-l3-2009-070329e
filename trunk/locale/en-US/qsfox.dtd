@@ -1,0 +1,5 @@
+<!ENTITY qsfox.label "Enable Sinhala Keyboard">
+<!ENTITY qsfoxContext.label "Enable Sinhala Keyboard">
+<!ENTITY qsfoxContext.accesskey "q">
+<!ENTITY qsfoxToolbar.label "Configure qsFOX">
+<!ENTITY qsfoxToolbar.tooltip "qsFOX">

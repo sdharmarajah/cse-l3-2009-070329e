@@ -1,0 +1,111 @@
+
+.topic{
+color:#330099;
+font-size:13px;
+font-style:italic;
+}
+
+.bodyText{
+color:#330099;
+font-size:12px;
+
+}
+
+
+
+.text-link{
+color:#330099;
+font-size:12px;
+}
+
+#develperName{
+color:#0033FF;
+font-size:18px;
+
+
+}
+
+#finishmsg{
+background-color:#FF0000;
+font-size:13px;
+
+}
+
+
+#develperTopic{
+color:#0033FF;
+font-size:16px;
+font-style:italic;
+
+}
+
+
+
+#popuppanel{
+background:url(images/background.jpg);
+
+
+
+}
+
+#qsfox-HelpButton
+{
+cursor: help;
+}
+
+#imgLogo
+{
+cursor: pointer;
+}
+
+
+#qsfox-statusbar
+{
+cursor: pointer;
+}
+
+#qsfox-toolbar-button
+{
+  list-style-image: url("chrome://qsfox/content/images/qsfoxicon.png");
+  -moz-image-region: rect(0px 24px 24px 0px);
+}
+#qsfox-toolbar-button:hover
+{
+  -moz-image-region: rect(24px 24px 48px  0px);
+}
+[iconsize="small"] #qsfox-toolbar-button
+{
+  -moz-image-region: rect( 0px 40px 16px 24px);
+}
+[iconsize="small"] #qsfox-toolbar-button:hover
+{
+  -moz-image-region: rect(24px 40px 40px 24px);
+}
+
+
+
+
+#qsfox-toolbarLayout
+{
+  color: black ! important;
+}
+#qsfox-toolbarSinglish
+{
+  color: black ! important;
+}
+#qsfox-toolbarAbout
+{
+  color: black ! important;
+}
+
+#qsfox-pane{
+ background:url(images/background.jpg);
+
+  border-top: 1px solid white;
+  border-bottom: 1px solid #666666;
+  border-left: 1px solid white;
+  border-right: 1px solid #666666;
+}
+#statusPopup{
+background:url(images/background.jpg);
+}

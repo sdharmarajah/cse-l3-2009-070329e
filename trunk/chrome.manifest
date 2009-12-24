@@ -1,0 +1,5 @@
+content	qsfox	content/
+locale	qsfox	en-US	locale/en-US/
+skin	qsfox	classic/1.0	skin/
+overlay	chrome://browser/content/browser.xul	chrome://qsfox/content/firefoxOverlay.xul
+style	chrome://global/content/customizeToolbar.xul	chrome://qsfox/skin/overlay.css
