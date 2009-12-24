@@ -1,0 +1,358 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://qsfox/skin/overlay.css" type="text/css"?>
+
+<!--                
+
+Author Information
+
+Isuru Udana Loku Narangoda
+Department of Computer Science & Engineering,
+University of Moratuwa,
+Sri Lanka.
+
+Blog: http://mytecheye.blogspot.com/
+Facebook : http://www.facebook.com/isudana
+GoogleTalk : isudana  
+Skype: isudana
+Twitter: http://twitter.com/isudana
+
+File Info
+
+This file contains the codes for creating the qsFOX wizard which will is displayed on installing the extension.
+This file can be devided into two section.
+	1) Wizard pages creation section
+	2) Script - to hadle actions and create UI elements dynamically according to the user privilleges
+
+In this file Admin and NoAdmin are represnting, User is an administrator of the machine and user is not an administrator of the machine respectively.
+
+Files copying is done using a batch file
+Desktop shortcut is created using a vbscript
+
+
+-->  
+
+<wizard id="qsfox_wizard" title="qsFOX Wizard"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" onwizardfinish="finish();">
+
+<script type="text/javascript">
+
+var isAdmin = new Boolean(false);
+var aBox;
+var bBox;
+var cBox;
+var configButton;
+isAdmin=false;
+var progress;
+var shortcutTarget;
+
+function detectAdmin(){                                                    //check for administrative privilleges
+
+ document.getElementById('qsfox_wizard').canRewind = false;
+ const cid = "@qsfox/qsfox;1";
+ var obj = Components.classes[cid].createInstance();
+ obj = obj.QueryInterface(Components.interfaces.Iqsfox); 		  //detect admin privilleges via qsfox.dll
+ if (obj.isadmin()) {
+	isAdmin=true;
+ }
+ else{
+	isAdmin=false;
+ }
+// isAdmin=false;
+
+ if(isAdmin){
+	createAdminPage();
+ }
+ else{
+	createNoAdminPage();
+ }
+
+} 
+
+
+function createAdminPage(){                                               //Create page elements if user has administrative privilleges
+
+ aBox = document.getElementById("configBox1");                          
+ bBox = document.getElementById("configBox2");
+ var txtAdmin = document.getElementById("lblAdminStatus");
+ txtAdmin.setAttribute("value","You have Administrative Privileges");
+ var txtInstructions = document.getElementById("lblInstructions");
+ txtInstructions.setAttribute("value","");
+
+}
+
+
+function createNoAdminPage(){						 //Create page elements if user does not have administrative privilleges
+
+ aBox = document.getElementById("configBox1");
+ bBox = document.getElementById("configBox2");
+ var ahbox = document.createElement("hbox");
+
+ var txtPath = document.createElement("textbox");
+ txtPath.setAttribute("id","txtPath");
+ txtPath.setAttribute("disabled","true");
+ txtPath.setAttribute("value","C:\\qsfox\\Mozilla Firefox");
+ ahbox.appendChild(txtPath);
+ var aselectFolder = document.createElement("button");
+ aselectFolder.setAttribute("label","Browse..");
+ aselectFolder.setAttribute("oncommand","selectFolder();");
+ ahbox.appendChild(aselectFolder);
+ aBox.appendChild(ahbox);
+
+ var txtAdmin = document.getElementById("lblAdminStatus");
+ txtAdmin.setAttribute("value","You don't have Administrative Privileges");
+ var txtInstructions = document.getElementById("lblInstructions");
+ txtInstructions.setAttribute("value","Set temporary directory to copy Firefox installation files");
+
+}
+
+
+function selectFolder(){						//open select folder dialog
+
+ var nsIFilePicker = Components.interfaces.nsIFilePicker;
+ var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+ fp.init(window, "Select a File", nsIFilePicker.modeGetFolder);
+
+ var res = fp.show();
+ if (res == nsIFilePicker.returnOK){
+  	var thefile = fp.file;
+  	document.getElementById("txtPath").value=thefile.path+"\\Mozilla Firefox";
+ }
+
+}
+
+
+function execute(){							//execute file operations
+
+ document.getElementById('qsfox_wizard').canAdvance = false;
+ document.getElementById('qsfox_wizard').canRewind = false;
+ cBox = document.getElementById("executeBox");
+ 
+ if(isAdmin){
+	executeAdmin();
+ }
+ else{
+	executeNoAdmin();
+ }
+
+}
+
+
+function executeAdmin(){                                                //execute if user has admin priv.
+
+ progress = document.createElement("progressmeter");
+ progress.setAttribute("mode","undetermined");
+ cBox.appendChild(progress);
+ setTimeout("copyfilesAdmin()",2000);
+
+}
+
+
+function executeNoAdmin(){						//execute if user does not have admin priv.
+
+ progress = document.createElement("progressmeter");
+ progress.setAttribute("mode","undetermined");
+ cBox.appendChild(progress);
+ setTimeout("copyfilesNoAdmin()",2000);
+
+}
+
+
+function copyfilesAdmin(){						//copy files - user has admin prev.
+
+ //file copying is done using a batch file
+ var dirService = Components.classes["@mozilla.org/file/directory_service;1"].
+                  getService(Components.interfaces.nsIProperties); 
+ var homeDirFile = dirService.get("CurProcD", Components.interfaces.nsIFile);
+ var homeDir = homeDirFile.path;
+
+ var MY_ID = "qsFOX@isuru.udana.loku.narangoda";
+ var em = Components.classes["@mozilla.org/extensions/manager;1"].
+         getService(Components.interfaces.nsIExtensionManager);
+ var filecopycommand = em.getInstallLocation(MY_ID).getItemFile(MY_ID, "content/other/filecopy.bat");
+ var usp10dll = em.getInstallLocation(MY_ID).getItemFile(MY_ID, "content/other/usp10.dll");
+
+ //////////////////////////////////////////these set of codes are used to run a external file////////////////////////////////////
+ 
+ var exe2 = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
+ exe2.initWithPath(filecopycommand.path);
+ var run2 = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+ run2.init(exe2);
+ var parameters2 = [homeDir,usp10dll.path];
+ run2.run(true, parameters2,parameters2.length);
+ 
+ //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+ var progressend = document.createElement("progressmeter");
+ progressend.setAttribute("mode","determined");
+ progressend.setAttribute("value","100");
+ cBox.replaceChild(progressend,progress);
+ document.getElementById('lblExecute').value = "Copying files completed";
+ document.getElementById('qsfox_wizard').canAdvance = true;
+
+}
+
+
+function copyfilesNoAdmin(){	                                         //copy files user haven't admin priv.
+
+ var dirService = Components.classes["@mozilla.org/file/directory_service;1"].
+                  getService(Components.interfaces.nsIProperties); 
+ var homeDirFile = dirService.get("CurProcD", Components.interfaces.nsIFile); 
+ var homeDir = homeDirFile.path;
+
+ var MY_ID = "qsFOX@isuru.udana.loku.narangoda";
+ var em = Components.classes["@mozilla.org/extensions/manager;1"].
+         getService(Components.interfaces.nsIExtensionManager);
+ var foldercopycommand = em.getInstallLocation(MY_ID).getItemFile(MY_ID, "content/other/foldercopy.bat");
+ var filecopycommand = em.getInstallLocation(MY_ID).getItemFile(MY_ID, "content/other/filecopy.bat");
+ var usp10dll = em.getInstallLocation(MY_ID).getItemFile(MY_ID, "content/other/usp10.dll");
+
+ var tempPath = document.getElementById("txtPath");
+ var exe = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
+ exe.initWithPath(foldercopycommand.path);
+ var run = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+ run.init(exe);
+ var parameters = [tempPath.value,homeDir];
+ run.run(true, parameters,parameters.length);
+
+ var exe2 = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
+ exe2.initWithPath(filecopycommand.path);
+ var run2 = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+ run2.init(exe2);
+ var parameters2 = [tempPath.value,usp10dll.path];
+ run2.run(true, parameters2,parameters2.length);
+
+ var progressend = document.createElement("progressmeter");
+ progressend.setAttribute("mode","determined");
+ progressend.setAttribute("value","100");
+ cBox.replaceChild(progressend,progress);
+
+ document.getElementById('lblExecute').value = "Copying files completed";
+ document.getElementById('qsfox_wizard').canAdvance = true;
+
+}
+
+
+function finishPageItems(){
+document.getElementById('qsfox_wizard').canRewind = false;
+if(!isAdmin){
+ fBox = document.getElementById("finishPageMsgbox");
+ var flabel = document.createElement("label");
+ flabel.setAttribute("value","For qsFOX enabled Firefox use new desktop icon");
+ flabel.setAttribute("id","finishmsg");
+ fBox.appendChild(flabel);
+}
+
+}
+
+
+
+function finish(){															 //runs on end of the wizard
+
+ var Prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                   .getService(Components.interfaces.nsIPrefService);
+ Prefs = Prefs.getBranch("extensions.qsfox.");
+ Prefs.setBoolPref("firstrun",false);                                     //mark the wizard has completed
+ Prefs.setBoolPref("helpviewed",false);										//This enables the help window to be opened after restart (refer to overlay.js)		
+ if(isAdmin){
+	restart();
+ }
+ else{
+	restartNewLocation();
+ }
+
+}
+
+
+function restart(){							//restart firefox 
+ var nsIAppStartup = Components.interfaces.nsIAppStartup;
+    Components.classes["@mozilla.org/toolkit/app-startup;1"].getService(nsIAppStartup).quit(nsIAppStartup.eForceQuit | nsIAppStartup.eRestart);
+}
+
+
+function restartNewLocation(){						//restart firefox if user does not have admin prev.
+
+ var tempPath3 = document.getElementById("txtPath");
+ var newPath = tempPath3.value+"\\firefox.exe";
+ createShortcut(newPath);
+ var exe3 = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
+ exe3.initWithPath(newPath);
+ var run3 = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+ run3.init(exe3);
+ var parameters3=[];
+ run3.run(false, parameters3,parameters3.length);
+
+ var nsIAppStartup = Components.interfaces.nsIAppStartup;
+    Components.classes["@mozilla.org/toolkit/app-startup;1"].getService(nsIAppStartup).quit(nsIAppStartup.eForceQuit);
+
+}
+
+
+function createShortcut(target){					//this function create desktop shortcut using a vbscript
+
+ var dirService2 = Components.classes["@mozilla.org/file/directory_service;1"].
+                  getService(Components.interfaces.nsIProperties); 
+ var DeskDirFile = dirService2.get("Desk", Components.interfaces.nsIFile);
+ var Desktop = DeskDirFile.path;
+ var linkPath = Desktop+"\\qsFOX enabled Firefox.lnk";
+
+ var MY_ID = "qsFOX@isuru.udana.loku.narangoda";
+ var em = Components.classes["@mozilla.org/extensions/manager;1"].
+         getService(Components.interfaces.nsIExtensionManager);
+ var createshortcutvbs = em.getInstallLocation(MY_ID).getItemFile(MY_ID, "content/other/createshortcut.vbs");
+ var shortcuticon = em.getInstallLocation(MY_ID).getItemFile(MY_ID, "skin/images/qsfox.ico");
+
+
+ 
+ var vbs = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
+ vbs.initWithPath(createshortcutvbs.path);
+ var runvbs = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+ runvbs.init(vbs);
+ var vbsparameters = [target,linkPath,shortcuticon.path];
+ runvbs.run(false, vbsparameters,vbsparameters.length);
+
+}
+
+</script>
+
+
+<wizardpage pageid="welcome" >
+    <description>
+      Welcome to qsFOX
+    </description>
+    <label value="This wizard will help you to configure qsFOX"/>
+	
+</wizardpage>
+
+<wizardpage description="Administrative Privileges" pageid="config" onpageshow="detectAdmin();">
+<vbox id="configBox1" align="left">
+   <label value="Admin Status" id="lblAdminStatus"/>
+   <label value="Instructions" id="lblInstructions"/>
+</vbox>
+<vbox align="center" id="configBox2">
+      <image style="width: 100px; height: 100px" src="chrome://qsfox/skin/images/qsfox.jpg" />
+</vbox>
+</wizardpage>
+
+
+<wizardpage description="Configuration Process" pageid="execute" onpageshow="execute();">
+<label value="Copying Files...." id="lblExecute"/>	
+<vbox align="center" id="executeBox">
+      <image style="width: 100px; height: 100px" src="chrome://qsfox/skin/images/qsfox.jpg" />
+</vbox>
+</wizardpage>
+
+
+<wizardpage pageid="finish" onpageshow="finishPageItems();">
+    <label value="Configuration Completed"/>
+    <label value="Click finish to restart the browser"/>
+	<vbox id="finishPageMsgbox" align="left">
+	
+	</vbox>
+</wizardpage>
+
+
+
+
+</wizard>

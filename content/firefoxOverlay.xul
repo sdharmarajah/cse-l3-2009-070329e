@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://qsfox/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://qsfox/skin/button.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://qsfox/locale/qsfox.dtd">
+
+
+
+<!--                
+
+Author Information
+
+Isuru Udana Loku Narangoda
+Department of Computer Science & Engineering,
+University of Moratuwa,
+Sri Lanka.
+
+Blog: http://mytecheye.blogspot.com/
+Facebook : http://www.facebook.com/isudana
+GoogleTalk : isudana  
+Skype: isudana
+Twitter: http://twitter.com/isudana
+
+This file is the main overlay of the extension which connect the extension with the browser User Interface.
+These are some component created by this file
+	*Main extension windows
+	*Status bar icons - switch keyboards, show main extension window
+	*Tool bar button
+	*Entry for tools menu
+	*Context menu item to switch keyboards
+
+
+
+-->
+
+
+
+
+
+
+<overlay id="qsfox-overlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+		 
+<!-- Scripts -->			 
+<script src="overlay.js"/>
+<script src="singlish.js"/>
+<script src="wijesekarakb.js"/>
+  
+<stringbundleset id="stringbundleset">
+	<stringbundle id="qsfox-strings" src="chrome://qsfox/locale/qsfox.properties"/>
+</stringbundleset>
+
+  
+<!-- Popupsets -->			   
+<popupset>  
+	<panel id="popuppanel" position="after_pointer" noautohide="false" noautofocus="false" onpopuphiding="qsfox.popupHiding();" onpopupshowing="qsfox.popupShowing();" onpopupshown="qsfox.popupShown();">
+		<vbox>
+			<textbox id="popuptextbox" multiline="true" rows="2" cols="150"/>
+			<hbox align="right" equalsize="always">
+				<button label="OK" oncommand="qsfox.settext()"/>
+				<button label="Cancel" oncommand="qsfox.cleartext()"/>
+			</hbox>		
+		</vbox>		
+	</panel>
+</popupset>
+
+
+<popupset>
+	<panel id="statusPopup" position="overlap" noautohide="false" noautofocus="true">
+		<hbox>
+			<image id="statusPopupImage" src="chrome://qsfox/skin/images/statusenglish.png" flex = "3"/>
+		</hbox>
+	</panel>
+</popupset>
+
+<popupset>
+	<panel id="singlishPopup" position="overlap" noautohide="false" noautofocus="true">
+		<hbox>
+			<label id="singlishText"></label>
+		</hbox>
+	</panel>
+</popupset>
+
+
+
+
+
+
+<!-- Shortcut keys -->  
+  
+<keyset id="mainKeyset">
+	<key id="shortcutKeyEnglsih" keycode="VK_F8" oncommand="qsfox.enableEnglish(event);"/>
+	<key id="shortcutKeySinhala" keycode="VK_F9" oncommand="qsfox.enableSinhala(event);"/>
+	<key id="shortcutKeySinglish" keycode="VK_F12" oncommand="qsfox.enableSinglish(event);"/>
+	<key id="panel_keys" keycode="VK_ENTER" oncommand="alert('Paste invoked');"/>
+</keyset>
+  
+<!-- Menus -->  
+
+<!-- Tools menu -->    
+<menupopup id="menu_ToolsPopup">
+    <menuitem id="qsfox-tool" label="qsFOX" image="chrome://qsfox/skin/images/qsfox.jpg" class="menuitem-iconic"
+              oncommand="qsfox.showScreen();"/>
+</menupopup>
+
+
+<!-- Context menu -->      
+<popup id="contentAreaContextMenu">
+  <menu image="chrome://qsfox/skin/images/qsfoxicon.png" class="menu-iconic" id="context-qsfox" label="qsFOX Select Keyboard"
+              accesskey="&qsfoxContext.accesskey;"
+              insertbefore="context-back">
+	<menupopup>   		
+		<menuitem id="mnuEnglishKb" label="English" key="shortcutKeyEnglsih" type="checkbox" checked="true" insertafter="singrishkeys" oncommand="qsfox.enableEnglish(event);"/>
+		<menuitem id="mnuSinhalaKb" label="Sinhala" key="shortcutKeySinhala" type="checkbox" checked="false" insertafter="singrishkeys" oncommand="qsfox.enableSinhala(event);"/>
+		<menuitem id="mnuSinglishKb" label="Singlish" key="shortcutKeySinglish" type="checkbox" checked="false" insertafter="singrishkeys" oncommand="qsfox.enableSinglish(event);"/>  
+	</menupopup>
+   </menu>		  
+</popup>
+  
+<!-- Tool bar button -->  
+<toolbarpalette id="BrowserToolbarPalette">
+  <toolbarbutton id="qsfox-toolbar-button"
+    label="&qsfoxToolbar.label;"
+	image="chrome://qsfox/skin/images/qsfoxicon.png"
+    tooltiptext="&qsfoxToolbar.tooltip;"
+    oncommand="qsfox.showScreen()"
+    class="toolbarbutton-1 chromeclass-toolbar-additional"/>
+</toolbarpalette>
+
+<!-- Status bar icons -->  
+<statusbar id="status-bar">
+   <statusbarpanel id="qsfox-statusbar"
+     label="qsFOX"
+     tooltiptext="qsFOX"
+     onclick="qsfox.showScreen()">
+		<image id="statusbarimage" tooltiptext="qsFOX" src="chrome://qsfox/skin/images/qsfoxicon.png"/>
+   </statusbarpanel>
+   <statusbarpanel id="qsfox-status"
+     label="qsFOX"
+     tooltiptext="Keyboard"
+     onclick="qsfox.switchKeynoard(event)">
+		<image id="statusbarKeyboardImage" tooltiptext="Keyboard" src="chrome://qsfox/skin/images/english.png"/>
+   </statusbarpanel>
+</statusbar>
+
+
+<!-- Main browser window content -->  
+
+<vbox id="appcontent" hidden="false">
+    <splitter id="qsfox-splitter" class="chromeclass-extrachrome" hidden="false" collapsed="true"/>
+    <vbox id="qsfox-pane" class="chromeclass-extrachrome" hidden="true" persist="height" style="width: 700px; height: 200px" >
+		<hbox persist="height">
+		
+		<!-- Left half of the window -->  
+		<groupbox flex="3">
+			<hbox>
+				<!-- Menu bar -->  
+				<toolbar id="qsfox-toolbar">
+					<toolbarbutton id ="qsfox-toolbarLayout" label="Wijesekara Layout " type="checkbox" accesskey="W" oncommand="qsfox.showLayout()"/>
+					<toolbarbutton id ="qsfox-toolbarSinglish" label="Singlish " type="checkbox" accesskey="S" oncommand="qsfox.showSinglish()"/>
+					<toolbarbutton id ="qsfox-toolbarAbout" label="About " type="checkbox" accesskey="A" oncommand="qsfox.showAbout()"/>
+				</toolbar>
+			</hbox> 
+			
+			<!-- Wijesekara Layout -->  
+ 			<groupbox id="qsfox-kblayout" hidden="false" style="width: 700px; height: 155px">
+				<hbox>
+					<button id="cmd96" image="chrome://qsfox/skin/images/repaya.png" flex="1"  disabled="true"/>
+					<button id="cmd113" image="chrome://qsfox/skin/images/q.png" flex="1"  disabled="true"/>
+					<button id="cmd119" image="chrome://qsfox/skin/images/w.png" flex="1" disabled="true"/>
+					<button id="cmd101" image="chrome://qsfox/skin/images/e.png" flex="1" disabled="true"/>
+					<button id="cmd114" image="chrome://qsfox/skin/images/r.png" flex="1" disabled="true"/>
+					<button id="cmd116" image="chrome://qsfox/skin/images/t.png" flex="1" disabled="true"/>
+					<button id="cmd121" image="chrome://qsfox/skin/images/y.png" flex="1" disabled="true"/>
+					<button id="cmd117" image="chrome://qsfox/skin/images/u.png" flex="1" disabled="true"/>
+					<button id="cmd105" image="chrome://qsfox/skin/images/i.png" flex="1" disabled="true"/>
+					<button id="cmd111" image="chrome://qsfox/skin/images/o.png" flex="1" disabled="true"/>
+					<button id="cmd112" image="chrome://qsfox/skin/images/p.png" flex="1" disabled="true"/>
+					<button id="cmd91" image="chrome://qsfox/skin/images/bracketopen.png" flex="1" disabled="true"/>
+					<button id="cmd93" image="chrome://qsfox/skin/images/bracketclose.png" flex="1" disabled="true"/>
+					<button id="cmd92" image="chrome://qsfox/skin/images/zwj.png" flex="1" disabled="true"/>
+				</hbox>
+				<hbox >
+					<spacer flex="1" />
+					<button id="cmd97" image="chrome://qsfox/skin/images/a.png" flex="1"  disabled="true"/>
+					<button id="cmd115" image="chrome://qsfox/skin/images/s.png" flex="1" disabled="true"/>
+					<button id="cmd100" image="chrome://qsfox/skin/images/d.png" flex="1" disabled="true"/>
+					<button id="cmd102" image="chrome://qsfox/skin/images/f.png" flex="1" disabled="true"/>
+					<button id="cmd103" image="chrome://qsfox/skin/images/g.png" flex="1" disabled="true"/>
+					<button id="cmd104" image="chrome://qsfox/skin/images/h.png" flex="1" disabled="true"/>
+					<button id="cmd106" image="chrome://qsfox/skin/images/j.png" flex="1" disabled="true"/>
+					<button id="cmd107" image="chrome://qsfox/skin/images/k.png" flex="1" disabled="true"/>
+					<button id="cmd108" image="chrome://qsfox/skin/images/l.png" flex="1" disabled="true"/>
+					<button id="cmd59" image="chrome://qsfox/skin/images/semicolon.png" flex="1" disabled="true"/>
+					<button id="cmd39" image="chrome://qsfox/skin/images/invertedcomma.png" flex="1" disabled="true"/>
+					<spacer flex="1" />
+				</hbox>
+				<hbox >
+					<spacer flex="3" />
+					<button id="cmd122" image="chrome://qsfox/skin/images/z.png" flex="1"  disabled="true"/>
+					<button id="cmd120" image="chrome://qsfox/skin/images/x.png" flex="1" disabled="true"/>
+					<button id="cmd99" image="chrome://qsfox/skin/images/c.png" flex="1" disabled="true"/>
+					<button id="cmd118" image="chrome://qsfox/skin/images/v.png" flex="1" disabled="true"/>
+					<button id="cmd98" image="chrome://qsfox/skin/images/b.png" flex="1" disabled="true"/>
+					<button id="cmd110" image="chrome://qsfox/skin/images/n.png" flex="1" disabled="true"/>
+					<button id="cmd109" image="chrome://qsfox/skin/images/m.png" flex="1" disabled="true"/>
+					<button id="cmd44" image="chrome://qsfox/skin/images/comma.png" flex="1" disabled="true"/>
+					<button id="cmd46" image="chrome://qsfox/skin/images/dot.png" flex="1" disabled="true"/>
+					<spacer flex="3" />
+				</hbox>
+  
+			</groupbox>
+			
+			<!-- Singlish Layout -->  
+ 			<groupbox id="qsfox-singlish" hidden="true" style="width: 700px; height: 155px">
+				
+				<!-- Tabs for different character types -->  
+				<tabbox  flex="1">
+					<tabs >
+						<tab label="Vowels"     />
+						<tab label="Auxiliaries"         />
+						<tab label="Consonants" />
+						<tab label="Derived Const." />
+					</tabs>
+					<tabpanels flex="1" >
+						<image style="width: 100px; height: 100px" src="chrome://qsfox/skin/images/vowels.png" />
+						<image style="width: 100px; height: 100px" src="chrome://qsfox/skin/images/auxiliaries.png" />
+						<image style="width: 100px; height: 100px" src="chrome://qsfox/skin/images/consonants.png" />
+						<image style="width: 100px; height: 100px" src="chrome://qsfox/skin/images/deriving_consonants.png" />
+					</tabpanels>
+				</tabbox>
+			</groupbox>
+
+			<!-- About info -->  
+			<groupbox id="qsfox-about" hidden="true" style="width: 700px; height: 155px">
+				<hbox>
+				<spacer flex="1"/>
+					<vbox flex="1">
+						<description></description> 
+						<description></description> 
+						<description></description> 
+						<description></description> 
+						<description id="develperTopic">  Created by </description>
+						<description id="develperName">Isuru Udana Loku Narangoda</description>
+						<label class="bodyText" value="isudana@gmail.com"/>
+						<label class = "text-link" value="http://mytecheye.blogspot.com" href="http://mytecheye.blogspot.com/"/>
+						<label class = "text-link" value="http://twitter.com/isudana" href="http://twitter.com/isudana/"/>
+					</vbox>
+					<spacer flex="1"/>
+					<vbox flex="1">
+						<description></description> 
+						<description></description> 
+						<description></description>	
+						<description></description> 
+						<description></description> 
+						<description></description> 
+						<description class="topic">Home page</description> 
+						<label class = "text-link" value="http://qsfox.mozdev.org" href="http://qsfox.mozdev.org/"/>
+						<description></description> 
+						<description class="topic">Reviews</description> 
+						<label class = "text-link" value="Post your Reviews here" href="https://addons.mozilla.org/en-US/firefox/addon/53146"/>
+						
+					</vbox>
+					<spacer flex="1"/>
+					<vbox flex="1">
+                 		<description></description>					
+						<description></description>					
+						<description></description> 
+						<description></description>					
+						<description></description>
+						<description></description>
+						<description></description> 
+						<description></description>
+						<description class="topic">Project idea, Supportive ideas and Testing</description>
+						<description class="bodyText">Pahan Sarathchandra</description>
+						<label class="bodyText" value="pahan@pahans.com"/>
+						<label class = "text-link" value="blog.pahans.com" href="http://blog.pahans.com"/>
+						<description></description>
+					</vbox>
+				</hbox>
+			</groupbox>
+		</groupbox>
+		
+		<!-- Right half of the window -->  
+		<groupbox flex="1">
+			<!-- 3 buttons -->  
+			<hbox>
+				<spacer flex="40"/>
+				<toolbar flex="1" id="qsfox-smalltoolbar">
+					<toolbarbutton  id="qsfox-WizardButton" class="toolbarbutton-iconic" tooltiptext="Wizard" oncommand="qsfox.showWizard()"/>
+					<toolbarbutton  id="qsfox-HelpButton" class="toolbarbutton-iconic" tooltiptext="Help" oncommand="qsfox.showHelp()"/>
+					<toolbarbutton  id="qsfox-CloseButton" class="toolbarbutton-iconic" tooltiptext="Close" oncommand="qsfox.showScreen()"/>
+				</toolbar>
+			</hbox>
+			<hbox>
+				<spacer flex = "3"/>
+				
+				<!-- Logo -->  
+				<image id="imgLogo" style="width: 155px; height: 155px" src="chrome://qsfox/skin/images/qsfox.jpg" flex = "3" onload="qsfox.setEventToLogo()" tooltiptext="http://qsfox.mozdev.org"/>
+				<spacer flex = "3"/>
+			</hbox>
+		</groupbox>
+		</hbox>	
+	</vbox>
+</vbox>
+</overlay>
+
+
+
+
